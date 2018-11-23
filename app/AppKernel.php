@@ -24,6 +24,8 @@ class AppKernel extends Kernel
 
             new Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle(),
 
+            new \Snc\RedisBundle\SncRedisBundle(),
+
 
             new AppBundle\AppBundle(),
         ];

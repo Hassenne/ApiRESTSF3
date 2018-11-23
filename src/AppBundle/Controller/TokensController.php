@@ -1,52 +1,52 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Lenovo
- * Date: 29/10/2018
- * Time: 10:04
- */
 
 namespace AppBundle\Controller;
 
-
+use AppBundle\Security\TokenStorage;
+use FOS\RestBundle\Controller\ControllerTrait;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+use FOS\RestBundle\Controller\Annotations as Rest;
 
-/**
- * @Security("is_anonymous() or is_authenticated()")
- */
-class UserController extends AbstractController
+class TokensController extends AbstractController
 {
+    use ControllerTrait;
 
+    /**
+     * @var UserPasswordEncoderInterface
+     */
+    private $passwordEncoder;
     /**
      * @var JWTEncoderInterface
      */
     private $jwtEncoder;
     /**
-     * @var UserPasswordEncoderInterface
+     * @var TokenStorage
      */
-    private $passwordEncoder;
+    private $tokenStorage;
 
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder, JWTEncoderInterface $jwtEncoder)
-    {
-
+    /**
+     * @param UserPasswordEncoderInterface $passwordEncoder
+     * @param JWTEncoderInterface $jwtEncoder
+     */
+    public function __construct(
+        UserPasswordEncoderInterface $passwordEncoder,
+        JWTEncoderInterface $jwtEncoder,
+        TokenStorage $tokenStorage
+    ) {
         $this->passwordEncoder = $passwordEncoder;
         $this->jwtEncoder = $jwtEncoder;
+        $this->tokenStorage = $tokenStorage;
     }
 
     /**
-     * @Route("/user/token")
-     * @Method("POST")
+     * @Rest\View(statusCode=201)
      */
-    public function tokenAction(Request $request)
+    public function postTokenAction(Request $request)
     {
         $user = $this->getDoctrine()
             ->getRepository('AppBundle:User')
@@ -56,7 +56,10 @@ class UserController extends AbstractController
             throw new BadCredentialsException();
         }
 
-        $isPasswordValid = $this->passwordEncoder->isPasswordValid($user, $request->getPassword());
+        $isPasswordValid = $this->passwordEncoder->isPasswordValid(
+            $user,
+            $request->getPassword()
+        );
 
         if (!$isPasswordValid) {
             throw new BadCredentialsException();
@@ -64,13 +67,11 @@ class UserController extends AbstractController
 
         $token = $this->jwtEncoder->encode(
             [
-                'username' => $user->getUsername(),
-                'exp' => time() + 3600
+                'username' => $user->getUsername(), 'exp' => time() + 3600,
             ]
         );
+        $this->tokenStorage->storeToken($user->getUsername(), $token);
 
         return new JsonResponse(['token' => $token]);
-
     }
-
 }

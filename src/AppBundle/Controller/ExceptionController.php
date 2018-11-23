@@ -1,20 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Lenovo
- * Date: 16/10/2018
- * Time: 08:56
- */
 
 namespace AppBundle\Controller;
-
 
 use AppBundle\Exception\ValidationException;
 use FOS\RestBundle\Controller\ControllerTrait;
 use FOS\RestBundle\View\View;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 
 class ExceptionController extends Controller
 {
@@ -32,13 +26,12 @@ class ExceptionController extends Controller
             return $this->getView($exception->getStatusCode(), json_decode($exception->getMessage(), true));
         }
 
-        if ($exception instanceof ValidationException) {
-            /** @var \Exception $exception */
-            return $this->getView(null, $exception->getMessage() . $exception->getTraceAsString());
-            //return $this->getView($exception->getStatusCode(), $exception->getMessage());
+        if ($exception instanceof HttpException) {
+            return $this->getView($exception->getStatusCode(), $exception->getMessage());
         }
 
-        return $this->getView(null, 'Unexpected error occured');
+        /** @var \Exception $exception */
+        return $this->getView(null, $exception->getMessage());
     }
 
     /**
@@ -54,9 +47,5 @@ class ExceptionController extends Controller
         ];
 
         return $this->view($data, $statusCode ?? 500);
-
     }
-
-
-
 }
