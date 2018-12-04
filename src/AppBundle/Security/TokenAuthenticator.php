@@ -105,9 +105,9 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
                 return null;
             }
 
-            if(!$this->tokenStorage->isTokenValid($data['username'], $credentials)) {
+            /*if(!$this->tokenStorage->isTokenValid($data['username'], $credentials)) {
                 return null;
-            }
+            }*/
 
             return $userProvider->loadUserByUsername($data['username']);
         } catch (JWTDecodeFailureException $exception) {

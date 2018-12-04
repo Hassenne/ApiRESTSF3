@@ -123,9 +123,9 @@ class UsersController extends AbstractController
         $this->encodePassword($theUser);
         $this->persistUser($theUser);
 
-        if ($modifiedUser->getPassword()) {
+        /*if ($modifiedUser->getPassword()) {
             $this->tokenStorage->invalidateToken($theUser->getUsername());
-        }
+        }*/
 
         return $theUser;
     }

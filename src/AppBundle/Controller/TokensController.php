@@ -70,7 +70,12 @@ class TokensController extends AbstractController
                 'username' => $user->getUsername(), 'exp' => time() + 3600,
             ]
         );
-        $this->tokenStorage->storeToken($user->getUsername(), $token);
+
+        //var_dump($token);die();
+        //$this->tokenStorage->storeToken($user->getUsername(), $token);
+        //var_dump($token);die();
+
+
 
         return new JsonResponse(['token' => $token]);
     }

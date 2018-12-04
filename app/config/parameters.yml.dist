@@ -23,3 +23,6 @@ parameters:
     jwt_key_pass_phrase: 'hassen'
     jwt_token_ttl: 3600
 
+    image_directory: '%kernel.project_dir%/web/images'
+    image_base_url: '/images/'
+
